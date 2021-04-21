@@ -1,0 +1,1 @@
+docker run --rm --name=tnt_app -d -e PHP_VERSION=7.4  -v data:/var/www/app/data -p80:80  app/tnt:latest

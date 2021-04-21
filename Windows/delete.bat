@@ -1,0 +1,1 @@
+docker rmi -f app/tnt:latest

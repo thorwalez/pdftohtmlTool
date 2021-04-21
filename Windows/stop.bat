@@ -1,0 +1,1 @@
+docker stop tnt_app
