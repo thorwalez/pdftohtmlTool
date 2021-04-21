@@ -1,0 +1,78 @@
+FROM ubuntu:16.04
+
+ARG PHP_VERSION_ARG=7.4
+
+RUN apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y
+RUN apt-get install -y software-properties-common && apt-get install -y python-software-properties && LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
+RUN apt-get update && apt-get upgrade -y && apt-get update && apt-get install -y curl git zip unzip imagemagick nginx && apt-get update --fix-missing
+
+RUN rm /etc/nginx/sites-available/default && echo "#Config\n \
+proxy_connect_timeout       600;\n \
+proxy_send_timeout          600;\n \
+proxy_read_timeout          600;\n \
+send_timeout                600;\n \
+client_max_body_size        5000;\n \
+client_header_timeout       600;\n \
+client_body_timeout         600;\n \
+fastcgi_read_timeout        300;\n \
+server {\n \
+	listen 80 default_server;\n \
+	listen [::]:80 default_server;\n \
+	root /var/www/;\n \
+	# Add index.php to the list if you are using PHP\n \
+	#index app_dev.php index.php index.html index.htm index.nginx-debian.html;\n \
+	server_name main.testing.suite;\n \
+	location ~ ^/index\.php$ {\n \
+                root /var/www/app/public/;\n \
+                fastcgi_pass 0.0.0.0:9000;\n \
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;\n \
+                include fastcgi_params;\n \
+                fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;\n \
+                fastcgi_param DOCUMENT_ROOT \$realpath_root;\n \
+                fastcgi_index index.php;\n \
+            }\n \
+         location / {\n \
+             fastcgi_read_timeout 60000;\n \
+             root /var/www/app/public/;\n \
+             try_files \$uri /index.php\$is_args\$args;\n \
+         }\n \
+    \n \
+}" > /etc/nginx/sites-available/default
+
+ENV PHP_VERSION=${PHP_VERSION_ARG}
+RUN apt-get install -y php$PHP_VERSION-fpm \
+                    php$PHP_VERSION-bcmath \
+                    php$PHP_VERSION-cli \
+                    php$PHP_VERSION-curl \
+                    php$PHP_VERSION-intl \
+                    php$PHP_VERSION-mbstring \
+                    php$PHP_VERSION-mysql \
+                    php$PHP_VERSION-xml \
+                    php$PHP_VERSION-ldap \
+                    php$PHP_VERSION-sqlite3 \
+                    php$PHP_VERSION-zip \
+                    php$PHP_VERSION-xsl \
+                    php$PHP_VERSION-xmlrpc \
+                    php$PHP_VERSION-gd \
+                    php-ssh2 \
+                    php-auth \
+                    php-apcu \
+                    php-imagick \
+                    php-xdebug
+
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer &&  chmod 777 /usr/local/bin/composer
+
+RUN sed -i 's/listen = \/run\/php\/php'$PHP_VERSION'-fpm.sock/listen = 0.0.0.0:9000/g' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+
+COPY ./template/TNT_Vorlage.ps /data/TNT_Vorlage.ps
+
+RUN echo "#!/usr/bin/env bash \n \
+          service php\$PHP_VERSION-fpm start && nginx -g 'daemon off;'">/entrypoint.sh && chmod 777 /entrypoint.sh
+
+EXPOSE 9000
+
+WORKDIR /var/www/app
+
+RUN git clone https://github.com/thorwalez/pdftohtml.git /var/www/app && composer install --dev
+
+ENTRYPOINT ["/entrypoint.sh"]
