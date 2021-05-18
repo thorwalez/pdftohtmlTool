@@ -73,6 +73,7 @@ EXPOSE 9000
 
 WORKDIR /var/www/app
 
-RUN git clone https://github.com/thorwalez/pdftohtml.git /var/www/app && composer install --dev
+RUN composer create-project thorwalez/pdftohtml:v1.* /var/www/app --repository="{\"url\": \"https://github.com/thorwalez/pdftohtml.git\", \"type\": \"vcs\"}" --remove-vcs --no-dev
+RUN mkdir -p /var/www/app/data && chmod -R 776 /var/www/app/data
 
 ENTRYPOINT ["/entrypoint.sh"]
