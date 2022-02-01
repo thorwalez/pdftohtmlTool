@@ -69,7 +69,8 @@ EXPOSE 9000
 
 WORKDIR /var/www/app
 
-RUN composer create-project thorwalez/pdftohtml:v1.* /var/www/app --repository="{\"url\": \"https://github.com/thorwalez/pdftohtml.git\", \"type\": \"vcs\"}" --remove-vcs --no-dev
-RUN mkdir -p /var/www/app/data && chmod -R 776 /var/www/app/data
+RUN composer create-project thorwalez/waybill_creator:v2.* /var/www/app --repository="{\"url\": \"https://github.com/thorwalez/waybill-creater.git\", \"type\": \"vcs\"}" --remove-vcs --no-dev
+RUN mkdir -p /var/www/app/data && chmod -R 776 /var/www/app/data && mkdir -p /var/www/app/var && chmod -R 777 /var/www/app/var
+RUN sed -i 's/APP_ENV=dev/APP_ENV=prod/g' .env
 
 ENTRYPOINT ["/entrypoint.sh"]

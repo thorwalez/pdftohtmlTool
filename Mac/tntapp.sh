@@ -2,6 +2,7 @@
 
 if [[ "$1" == "stop" ]]; then
   docker stop tnt_app
+  exit
 fi
 
 if [[ "$1" == "build" ]]; then
@@ -10,8 +11,7 @@ if [[ "$1" == "build" ]]; then
   cd ..
 fi
 
-if [ $1 == "update" ]
-  then
+if [ "$1" == "update" ];  then
     docker rmi -f app/tnt:latest
     sh tntapp.sh build
     exit
