@@ -1,4 +1,4 @@
-#TNT Form to PDF
+#TNT Frachtbrief Formular
 
 Die Applikation stellt eine Weboberfläche bereit mit der ein PDF Dokument ausgefüllt werden kann.
 Hierbei handelt es sich um ein eingescanntes Dokument was umgewandelt wurde um es bearbeiten zu können.
